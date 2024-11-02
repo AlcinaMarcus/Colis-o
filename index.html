@@ -1,0 +1,128 @@
+<!--
+Programa: Colisão do quadrado.
+Nome: Guilherme Holanda- Nº:12.
+Nome: Marcus Vinícius- Nº:22.
+DESCRIÇÃO: O código deve mostrar dois objetos(player) um objeto de colisão (wall)
+os players devem andar com as teclas do teclado e com os botões na tela, e se houver colisão 
+com a parede, a mensagem de colisão detectada aparecerá na tela.
+-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <title>Colisões</title>
+    <style>
+        canvas {
+            border: 1px solid #d3d3d3;
+            background-color: #f0f0f0;
+        }
+        .button {
+            margin: 5px;
+        }
+    </style>
+    <script>
+        let player1, player2, wall;
+
+        function startGame() {
+            player1 = new component(30, 30, "red", 10, 120); // Jogador 1 em vermelho
+            player2 = new component(30, 30, "blue", 400, 120); // Jogador 2 em azul
+            wall = new component(50, 30, "black", 200, 120); // Parede retangular
+            myGameArea.start();
+        }
+
+        const myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = 480;
+                this.canvas.height = 270;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.interval = setInterval(updateGameArea, 20); // Atualiza a cada 20ms
+
+                // Eventos de teclado para movimentação dos jogadores
+                window.addEventListener('keydown', e => { myGameArea.key = e.keyCode; });
+                window.addEventListener('keyup', () => {
+                    myGameArea.key = false;
+                    player1.speedX = player1.speedY = player2.speedX = player2.speedY = 0;
+                });
+            },
+            clear: function () { // Limpa o canvas para a próxima atualização
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            },
+            stop: function () { // Para o jogo
+                clearInterval(this.interval);
+            }
+        };
+
+        function component(width, height, color, x, y) {
+            this.width = width;
+            this.height = height;
+            this.speedX = 0;
+            this.speedY = 0;
+            this.x = x;
+            this.y = y;
+
+            // Atualiza a posição do componente no canvas
+            this.update = function () {
+                const ctx = myGameArea.context;
+                ctx.fillStyle = color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            };
+
+            // Detecta colisão com outro objeto
+            this.crashWith = function (other) {
+                return !(this.y + this.height < other.y || this.y > other.y + other.height ||
+                         this.x + this.width < other.x || this.x > other.x + other.width);
+            };
+
+            // Atualiza a nova posição do componente com base em sua velocidade
+            this.newPos = function () {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.crashWith(wall)) { // Verifica colisão com a parede
+                    this.speedX = this.speedY = 0;
+                    alert("COLISÃO DETECTADA.");
+                }
+            };
+        }
+
+        function updateGameArea() {
+            if (player1.crashWith(player2)) { // Colisão entre jogadores
+                alert("COLISÃO DETECTADA.");
+                myGameArea.stop();
+            } else {
+                myGameArea.clear();
+                wall.update();
+                player1.newPos();
+                player2.newPos();
+                player1.update();
+                player2.update();
+
+                // Movimentação dos jogadores com teclas específicas
+                if (myGameArea.key) {
+                    if (myGameArea.key === 65) { player1.speedX = -1; } // A
+                    if (myGameArea.key === 68) { player1.speedX = 1; }  // D
+                    if (myGameArea.key === 87) { player1.speedY = -1; } // W
+                    if (myGameArea.key === 83) { player1.speedY = 1; }  // S
+                    if (myGameArea.key === 37) { player2.speedX = -1; } // Setas
+                    if (myGameArea.key === 39) { player2.speedX = 1; }  // Setas
+                    if (myGameArea.key === 38) { player2.speedY = -1; } // Setas
+                    if (myGameArea.key === 40) { player2.speedY = 1; }  // Setas
+                }
+            }
+        }
+    </script>
+</head>
+
+<body onload="startGame();">
+    <h2>Controles:</h2>
+    <button class="button" onclick="player1.speedX = -1;">Esquerda</button>
+    <button class="button" onclick="player1.speedX = 1;">Direita</button>
+    <button class="button" onclick="player1.speedY = -1;">Cima</button>
+    <button class="button" onclick="player1.speedY = 1;">Baixo</button>
+
+    <button class="button" onclick="player2.speedX = -1;">←</button>
+    <button class="button" onclick="player2.speedX = 1;">→</button>
+    <button class="button" onclick="player2.speedY = -1;">↑</button>
+    <button class="button" onclick="player2.speedY = 1;">↓</button>
+</body>
+</html>
